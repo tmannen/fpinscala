@@ -23,12 +23,12 @@ object List { // `List` companion object. Contains functions for creating and wo
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
 
-  val x = List(1,2,3,4,5) match {
-    case Cons(x, Cons(2, Cons(4, _))) => x
-    case Nil => 42
-    case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
-    case Cons(h, t) => h + sum(t)
-    case _ => 101
+  val x = List(1,2,3,4,5) match { // EXERCISE:
+    case Cons(x, Cons(2, Cons(4, _))) => x // 1
+    case Nil => 42 // run time error
+    case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y // 1 + 2 = 3
+    case Cons(h, t) => h + sum(t) // 15
+    case _ => 101 // 101
   }
 
   def append[A](a1: List[A], a2: List[A]): List[A] =
@@ -50,15 +50,40 @@ object List { // `List` companion object. Contains functions for creating and wo
     foldRight(ns, 1.0)(_ * _) // `_ * _` is more concise notation for `(x,y) => x * y`; see sidebar
 
 
-  def tail[A](l: List[A]): List[A] = ???
+  def tail[A](l: List[A]): List[A] = l match {
+    case Nil => l
+    case Cons(_, lt) => lt
+  }
 
-  def setHead[A](l: List[A], h: A): List[A] = ???
+  def setHead[A](l: List[A], h: A): List[A] = l match {
+    case Nil => sys.error("setHead on empty list")
+    case Cons(_, lt) => Cons(h, lt)
+  }
 
-  def drop[A](l: List[A], n: Int): List[A] = ???
+  def drop[A](l: List[A], n: Int): List[A] = l match {
+    //originally I had case matching first, but it needs to do the check first because otherwise it takes the tail before stopping
+    //and returning one less item than was meant to.
+    if (n <= 0) l
+    else l match {
+      case Nil => Nil
+      case Cons(_, lt) => drop(t, n-1)
+  }
 
-  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = ???
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
+    //model answer doesnt have else, it would skip the case and go to the next one?
+    case Cons(lh, lt) =>{
+      if (f(lh)) dropWhile(lt, f)
+      else Cons(lh, lt)
+    }
 
-  def init[A](l: List[A]): List[A] = ???
+    case _ => l
+  }
+
+  def init[A](l: List[A]): List[A] = l match {
+    case Cons(lh, Nil) => lh
+    case Cons(lh, lt) => lt match {
+      case Cons(sublh, sublt) Cons(lh, init(lt))
+  }
 
   def length[A](l: List[A]): Int = ???
 
