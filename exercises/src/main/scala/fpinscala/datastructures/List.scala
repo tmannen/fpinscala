@@ -60,17 +60,18 @@ object List { // `List` companion object. Contains functions for creating and wo
     case Cons(_, lt) => Cons(h, lt)
   }
 
-  def drop[A](l: List[A], n: Int): List[A] = l match {
+  def drop[A](l: List[A], n: Int): List[A] = {
     //originally I had case matching first, but it needs to do the check first because otherwise it takes the tail before stopping
     //and returning one less item than was meant to.
     if (n <= 0) l
     else l match {
       case Nil => Nil
-      case Cons(_, lt) => drop(t, n-1)
+      case Cons(_, lt) => drop(lt, n-1)
+    }
   }
 
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
-    //model answer doesnt have else, it would skip the case and go to the next one?
+    //model answer doesnt have else, in which case it would skip the case and go to the next one?
     case Cons(lh, lt) =>{
       if (f(lh)) dropWhile(lt, f)
       else Cons(lh, lt)
@@ -78,12 +79,21 @@ object List { // `List` companion object. Contains functions for creating and wo
 
     case _ => l
   }
-
   def init[A](l: List[A]): List[A] = l match {
-    case Cons(lh, Nil) => lh
-    case Cons(lh, lt) => lt match {
-      case Cons(sublh, sublt) Cons(lh, init(lt))
+      case Nil => sys.error("init of empty list")
+      case Cons(_, Nil) => Nil
+      case Cons(h, t) => Cons(h, init(t))
   }
+
+/*
+  my original solution (model answer is a lot better, forgot that you can just return the Nil there):
+  def init[A](l: List[A]): List[A] = l match {
+      case Cons(lh, lt) => lt match {
+      case Cons(_, Nil) => Cons(lh, Nil)
+      case Cons(_, _) => Cons(lh, init(lt))
+    }
+  }
+*/
 
   def length[A](l: List[A]): Int = ???
 
