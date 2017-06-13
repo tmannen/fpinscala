@@ -37,6 +37,7 @@ object List { // `List` companion object. Contains functions for creating and wo
       case Cons(h,t) => Cons(h, append(t, a2))
     }
 
+  //not tail recursive as scala needs to know the last result before applying the first
   def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B): B = // Utility functions
     as match {
       case Nil => z
@@ -95,9 +96,33 @@ object List { // `List` companion object. Contains functions for creating and wo
   }
 */
 
-  def length[A](l: List[A]): Int = ???
+  def length[A](l: List[A]): Int =
+    foldRight(l, 0)((x, y) => y + 1)
 
-  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = ???
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = 
+    l match {
+      case Nil => z
+      case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
+    }
+
+  def sumLeft(ns: List[Int]) =
+    foldLeft(ns, 0)((x,y) => x + y)
+
+  def productLeft(ns: List[Double]) =
+    foldLeft(ns, 1.0)(_ * _)
+
+  def lengthLeft[A](ns: List[A]) =
+    foldLeft(ns, 0)((x, y) => x + 1)
+
+  def reverseList[A](l: List[A]) = 
+    foldRight(l, Nil)((x, y) => Cons(y, Cons(x, Nil)))
 
   def map[A,B](l: List[A])(f: A => B): List[B] = ???
 }
+
+  def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B): B = // Utility functions
+    as match {
+      case Nil => z
+      case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+    }
+
