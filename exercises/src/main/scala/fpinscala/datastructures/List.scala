@@ -117,7 +117,43 @@ object List { // `List` companion object. Contains functions for creating and wo
   def reverseList[A](l: List[A]) = 
     foldLeft(l, List[A]())((x, y) => Cons(y, x))
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = ???
+  def map[A,B](l: List[A])(f: A => B): List[B] = 
+    l match {
+      case Nil => sys.error("Can't map empty list")
+      case Cons(h, Nil) => Cons(f(h), Nil)
+      case Cons(h, t) => Cons(f(h), map(t)(f))
+    }
+
+  /*Attempt at foldLeft in terms of foldRight. Works when order doesn't matter (like sum and product)
+    but not when it does (like reverseList). (is this even correct if l were reversed? 
+    model answer uses a similar solution with foldRight in terms of foldLeft, but not in foldLeft in terms of foldRight..) 
+  */
+  def foldLeft2[A,B](l: List[A], z: B)(f: (B, A) => B): B = 
+    foldRight(l, z)((x, y) => f(y, x))
+
+  def appendfoldRight[A](a1: List[A], a2: List[A]): List[A] =
+    foldRight(a1, a2)((x, y) => Cons(x, y))
+
+  def listOfLists[A](l: List[List[A]]): List[A] =
+    foldRight(l, List[A]())((x, y) => appendfoldRight(x, y))
+
+  //probably easier using folds..
+  def addOneEach(l: List[Int]): List[Int] =
+    l match {
+      case Nil => l
+      case Cons(h, t) => Cons(h + 1, addOneEach(t))
+    }
+
+  def doubleToString(l: List[Double]): List[String] =
+    l match {
+      case Nil => sys.error("Can't convert empty list") //here we have to do this because we can't return l like above since they're different types
+      case Cons(h, Nil) => Cons(h.toString, Nil)
+      case Cons(h, t) => Cons(h.toString, doubleToString(t))
+    }
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] = 
+    foldRight(as, Nil: List[A])((h, t) => if (f(h)) Cons(h, t) else t)
+
 }
 
 /*
@@ -126,5 +162,5 @@ object List { // `List` companion object. Contains functions for creating and wo
       case Nil => z
       case Cons(x, xs) => f(x, foldRight(xs, z)(f))
     }
-
+  val lol = List(List(1,2), List(3,4))
 */
