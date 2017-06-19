@@ -160,6 +160,32 @@ object List { // `List` companion object. Contains functions for creating and wo
   def flatFilter[A](as: List[A])(f: A => Boolean): List[A] = 
     flatMap(as)(x => if (f(x)) List(x) else Nil)
 
+  def listAdd(l1: List[Int], l2: List[Int]): List[Int] = 
+    (l1, l2) match {
+      case (_, Nil) => Nil
+      case (Nil, _) => Nil
+      case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, listAdd(t1, t2))
+    }
+
+  def zipWith[A, B, C](l1: List[A], l2: List[B])(f: (A, B) => C): List[C] = 
+    (l1, l2) match {
+      case (_, Nil) => Nil
+      case (Nil, _) => Nil
+      case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+    }
+
+
+    /* Attempt at hasSubsequence. this tests if the subsequence exists in any order? basically
+       hasSubsequence(List(1,2,3,5,4), List(3,4)) would return true since 3,4 come after another..
+       answer has a helper function that tests every sublist of sup
+    */
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = 
+    (sup, sub) match {
+      case (_, Nil) => true
+      case (Nil, _) => false
+      case (Cons(h1, t1), Cons(h2, t2)) => if (h1 == h2) hasSubsequence(t1, t2) else hasSubsequence(t1, Cons(h2, t2))
+    }
+
 }
 
 /*
