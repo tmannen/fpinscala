@@ -28,7 +28,23 @@ object Tree {
 		case Branch(left, right) => Branch(map(left)(f), map(right)(f))
 	}
 
-	def fold[A, B](tree: Tree[A])(f: A => B): B = tree match {
-		
-	}
+	/* from answers - couldn't figure out the second function thing. implementing the rest on my own
+		basically, different functions for Branches and Leaves?
+	 */
+	def fold[A,B](t: Tree[A])(f: A => B)(g: (B,B) => B): B = t match {
+	    case Leaf(a) => f(a)
+	    case Branch(l,r) => g(fold(l)(f)(g), fold(r)(f)(g))
+  	}
+
+  	def foldSize[A](tree: Tree[A]): Int = 
+		fold(tree)(a => 1)((x, y) => 1) 
+
+	def foldMaximum(tree: Tree[Int]): Int = 
+		fold(tree)(a => a)((x, y) => x max y)
+
+	def foldDepth[A](tree: Tree[A]): Int = 
+		fold(tree)(a => 1)((x, y) => (1 + x) max (1 + y)) //note: model answer has better, just 1 + (x max y) is enough
+
+	def foldMap[A, B](tree: Tree[A])(f: A => B): Tree[B] = 
+		fold(tree)(f)((x, y) => Branch(x, y))
 }
