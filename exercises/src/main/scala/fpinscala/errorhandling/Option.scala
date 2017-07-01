@@ -20,7 +20,7 @@ sealed trait Option[+A] {
   }
 
   def orElse[B>:A](ob: => Option[B]): Option[B] = 
-    Some(this.getOrElse(ob)) //answer uses map, doesn't this work?
+    Some(this.getOrElse(ob)) //answer uses map, doesn't this work? no because ob is an Option?
 
   def filter(f: A => Boolean): Option[A] = this match {
     case None => None
@@ -56,7 +56,12 @@ object Option {
   def variance(xs: Seq[Double]): Option[Double] = 
     mean(xs).flatMap(m => mean(xs.map(x => math.pow(x - m, 2))))
 
-  def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = ???
+  def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = 
+    (a.getOrElse(None), b.getOrElse(None)) match {
+      case (None, _) => None
+      case (_, None) => None
+      case (x, y) => Some(f(x, y))
+    }
 
   def sequence[A](a: List[Option[A]]): Option[List[A]] = ???
 
