@@ -20,11 +20,12 @@ sealed trait Option[+A] {
   }
 
   def orElse[B>:A](ob: => Option[B]): Option[B] = 
-    Some(this.getOrElse(ob)) //answer uses map, doesn't this work? no because ob is an Option?
+    //Some(this.getOrElse(ob)) //answer uses map, doesn't this work? no because ob is an Option?
+    this map (Some(_)) getOrElse ob
 
   def filter(f: A => Boolean): Option[A] = this match {
     case None => None
-    case Some(v) => if f(v) this else None
+    case Some(v) => if (f(v)) this else None
   }
 
 }
@@ -58,11 +59,12 @@ object Option {
 
   //model answer a lot better..
   def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = 
-    (a.getOrElse(None), b.getOrElse(None)) match {
+    /*(a.getOrElse(None), b.getOrElse(None)) match {
       case (None, _) => None
       case (_, None) => None
       case (x, y) => Some(f(x, y))
-    }
+    } doesnt even compile */ 
+    a flatMap (aa => b map (bb => f(aa, bb)))
 
   //copied from answer
   def sequence[A](a: List[Option[A]]): Option[List[A]] = 
@@ -74,6 +76,6 @@ object Option {
   def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = 
     a match {
       case Nil => Some(Nil)
-      case h :: t => f(h).flatMap(hh => traverse(t)(f).map(th => hh :: th) //th is a list so it works
+      case h :: t => f(h).flatMap(hh => traverse(t)(f).map(th => hh :: th)) //th is a list so it works
     }
 }

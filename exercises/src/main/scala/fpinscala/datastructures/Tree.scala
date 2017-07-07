@@ -46,5 +46,5 @@ object Tree {
 		fold(tree)(a => 1)((x, y) => (1 + x) max (1 + y)) //note: model answer has better, just 1 + (x max y) is enough
 
 	def foldMap[A, B](tree: Tree[A])(f: A => B): Tree[B] = 
-		fold(tree)(f)((x, y) => Branch(x, y))
+		fold(tree)(a => Leaf(f(a)): Tree[B])((x, y) => Branch(x, y))
 }
