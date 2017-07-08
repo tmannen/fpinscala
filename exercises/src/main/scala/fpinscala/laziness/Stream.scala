@@ -24,13 +24,28 @@ trait Stream[+A] {
       case Cons(h, t) => h() :: t().toList()
     }
 
-  def take(n: Int): Stream[A] = ???
+  def take(n: Int): Stream[A] = 
+    if (n <= 0) Empty
+    else {
+      this match {
+        case Empty => empty
+        case Cons(h, t) => cons(h(), t().take(n - 1))
+      }
+    }
 
   def drop(n: Int): Stream[A] = ???
 
-  def takeWhile(p: A => Boolean): Stream[A] = ???
+  def takeWhile(p: A => Boolean): Stream[A] = 
+   this match {
+    case Empty => empty
+    case Cons(h, t) => if (p(h())) cons(h(), t().takeWhile(p)) else empty
+   }
 
-  def forAll(p: A => Boolean): Boolean = ???
+  def takeWhileViaFold(p: A => Boolean): Stream[A] = 
+    foldRight(empty[A])((x, y) => if (p(x)) cons(x, y) else empty)
+
+  def forAll(p: A => Boolean): Boolean = 
+    foldRight(true)((x, y) => p(x) && y)
 
   def headOption: Option[A] = ???
 
