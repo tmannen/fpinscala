@@ -64,6 +64,14 @@ trait Stream[+A] {
   def flatMap[B](f: A => Stream[B]): Stream[B] = 
     foldRight(empty[B])((x, y) => f(x).append(y))
 
+  def mapViaUnfold[B](f: A => B): Stream[B] = 
+    unfold(this){case } 
+    
+  def takeViaUnfold
+  def takeWhileViaUnfold
+  def zipWithViaUnfold
+  def zipAllViaUnfold
+
   def startsWith[B](s: Stream[B]): Boolean = ???
 }
 case object Empty extends Stream[Nothing]
@@ -111,6 +119,16 @@ object Stream {
     }
 
   def fibsViaUnfold(): Stream[Int] =
-    unfold((0, 1))((x, y) => Some((x + y, (y, x + y))))
+    //not sure why this needs case as in answer? but otherwise does not work
+    unfold((0, 1)) {case (x, y) => Some((x + y, (y, x + y)))}
+
+  val onesViaUnfold: Stream[Int] = 
+    unfold(1)(x => Some((1, 1)))
+
+  def constantViaUnfold[A](a: A): Stream[A] = 
+    unfold(a)(x => Some((a, a)))
+
+  def fromViaUnfold(n: Int): Stream[Int] = 
+    unfold(n)(x => Some((x, x + 1)))
   
 }
