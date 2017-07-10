@@ -52,6 +52,12 @@ trait Stream[+A] {
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
 
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = 
+    f(z) match {
+      case None => empty
+      case Some((a, s)) => cons(a, unfold(s)(f))
+    }
+
   def map[B](f: A => B): Stream[B] = 
     foldRight(empty[B])((x, y) => cons(f(x), y))
 
@@ -65,10 +71,25 @@ trait Stream[+A] {
     foldRight(empty[B])((x, y) => f(x).append(y))
 
   def mapViaUnfold[B](f: A => B): Stream[B] = 
-    unfold(this){case } 
+    unfold(this) {
+      case Cons(h, t) => Some((f(h()), t()))
+      case Empty => None
+    } 
     
-  def takeViaUnfold
-  def takeWhileViaUnfold
+  def takeViaUnfold(n: Int): Stream[A] =
+    unfold((this, n)) {
+      case (Cons(h, t), 1) => Some((h(), (empty, 0)))
+      case (Cons(h, t), n) if n > 1 => Some((h(), (t(), n - 1)))
+      case _ => None
+    }
+
+  def takeWhileViaUnfold(p: A => Boolean): Stream[A] =
+    unfold((this, n)) {
+      case (Cons(h, t), 1) => Some((h(), (empty, 0)))
+      case (Cons(h, t), n) if n > 1 => Some((h(), (t(), n - 1)))
+      case _ => None
+    }
+
   def zipWithViaUnfold
   def zipAllViaUnfold
 
