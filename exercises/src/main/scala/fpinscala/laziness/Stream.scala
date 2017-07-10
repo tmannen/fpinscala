@@ -52,12 +52,6 @@ trait Stream[+A] {
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
 
-  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = 
-    f(z) match {
-      case None => empty
-      case Some((a, s)) => cons(a, unfold(s)(f))
-    }
-
   def map[B](f: A => B): Stream[B] = 
     foldRight(empty[B])((x, y) => cons(f(x), y))
 
@@ -84,17 +78,47 @@ trait Stream[+A] {
     }
 
   def takeWhileViaUnfold(p: A => Boolean): Stream[A] =
-    unfold((this, n)) {
-      case (Cons(h, t), 1) => Some((h(), (empty, 0)))
-      case (Cons(h, t), n) if n > 1 => Some((h(), (t(), n - 1)))
+    unfold(this) {
+      case Cons(h, t) if (p(h())) => Some((h(), t()))
       case _ => None
     }
 
-  def zipWithViaUnfold
-  def zipAllViaUnfold
+  def zipWithViaUnfold[B,C](s2: Stream[B])(f: (A, B) => C): Stream[C] =
+    unfold((this, s2)) {
+      case (Cons(h1, t1), Cons(h2, t2)) =>
+        Some((f(h1(), h2()), (t1(), t2())))
+      case _ => None
+    }
 
-  def startsWith[B](s: Stream[B]): Boolean = ???
+  //couldn't figure out, checked from answers
+  def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])] =
+    zipWithAll(s2)((_,_))
+
+  def zipWithAll[B, C](s2: Stream[B])(f: (Option[A], Option[B]) => C): Stream[C] =
+    Stream.unfold((this, s2)) {
+      case (Empty, Empty) => None
+      case (Cons(h, t), Empty) => Some(f(Some(h()), Option.empty[B]) -> (t(), empty[B]))
+      case (Empty, Cons(h, t)) => Some(f(Option.empty[A], Some(h())) -> (empty[A] -> t()))
+      case (Cons(h1, t1), Cons(h2, t2)) => Some(f(Some(h1()), Some(h2())) -> (t1() -> t2()))
+    }
+
+  //doesnt return empty..
+  def tails: Stream[Stream[A]] = 
+    unfold(this) {
+        case Cons(h, t) => Some((cons(h(), t()), t()))
+        case _ => None
+      }
+
+  //couldnt figure out
+  def startsWith[A](s: Stream[A]): Boolean =
+    zipAll(s).takeWhile(!_._2.isEmpty) forAll {
+      case (h,h2) => h == h2
+    }
+
+  //TODO
+  def scanRight
 }
+
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
 
