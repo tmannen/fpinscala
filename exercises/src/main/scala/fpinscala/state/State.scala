@@ -68,7 +68,13 @@ object RNG {
       (x :: xs, rng2)
     }
 
-  def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = ???
+  def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = 
+  //remember Rand is a function and in this case for example 'rng' is passed forward
+    rng => {
+      val (a, rnga) = ra(rng)
+      val (b, rngb) = rb(rnga)
+      (f(a, b), rngb)
+    }
 
   def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = ???
 
